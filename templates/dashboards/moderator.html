@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Moderator Dashboard</h2>
+
+  <h4>Pending Offers for Review</h4>
+  <ul class="list-group">
+    {% for offer in pending_offers %}
+      <li class="list-group-item">{{ offer.title }} — {{ offer.advertiser.username }} <a href="{% url 'offer_detail' offer.id %}">View</a></li>
+    {% empty %}
+      <li class="list-group-item">No pending offers.</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

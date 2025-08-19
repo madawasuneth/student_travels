@@ -1,0 +1,405 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}Advertiser Dashboard — Student Travels{% endblock %}
+
+{% block content %}
+<section class="section container">
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1>Advertiser Dashboard</h1>
+      <p>Welcome back, {{ user.first_name|default:user.username }}!</p>
+    </div>
+
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <div class="stat-number">{{ dashboard_data.total_offers }}</div>
+        <div class="stat-label">Total Offers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ dashboard_data.pending_offers }}</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ recent_bookings|length }}</div>
+        <div class="stat-label">Recent Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">{{ dashboard_data.unread_messages }}</div>
+        <div class="stat-label">Unread Messages</div>
+      </div>
+    </div>
+
+    <div class="dashboard-actions">
+      <a href="{% url 'create_offer' %}" class="btn btn-primary btn-lg">
+        ➕ Create New Offer
+      </a>
+      <a href="{% url 'my_offers' %}" class="btn btn-outline">
+        📋 Manage My Offers
+      </a>
+    </div>
+
+    <div class="dashboard-content">
+      <div class="dashboard-section">
+        <div class="section-header">
+          <h2>My Recent Offers</h2>
+          <a href="{% url 'my_offers' %}" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        
+        {% if my_offers %}
+          <div class="offers-list">
+            {% for offer in my_offers %}
+              <div class="offer-card">
+                <div class="offer-image">
+                  {% if offer.image %}
+                    <img src="{{ offer.image.url }}" alt="{{ offer.title }}">
+                  {% else %}
+                    <img src="{% static 'images/gold-coast-sunny.jpg' %}" alt="{{ offer.title }}">
+                  {% endif %}
+                </div>
+                <div class="offer-info">
+                  <h3><a href="{% url 'offer_detail' offer.id %}">{{ offer.title }}</a></h3>
+                  <p>{{ offer.destination }} • {{ offer.start_date|date:"M d, Y" }}</p>
+                  <div class="offer-meta">
+                    <span class="status-badge status-{{ offer.status }}">{{ offer.get_status_display }}</span>
+                    <span class="price">${{ offer.price }}</span>
+                    <span class="spots">{{ offer.available_spots }} spots left</span>
+                  </div>
+                </div>
+                <div class="offer-actions">
+                  <a href="{% url 'edit_offer' offer.id %}" class="btn btn-outline btn-sm">Edit</a>
+                  <a href="{% url 'offer_detail' offer.id %}" class="btn btn-primary btn-sm">View</a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <p>You haven't created any offers yet.</p>
+            <a href="{% url 'create_offer' %}" class="btn btn-primary">Create Your First Offer</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="dashboard-sidebar">
+        <div class="dashboard-section">
+          <h2>Recent Bookings</h2>
+          {% if recent_bookings %}
+            <div class="bookings-list">
+              {% for booking in recent_bookings %}
+                <div class="booking-item">
+                  <div class="booking-info">
+                    <strong>{{ booking.student.get_full_name|default:booking.student.username }}</strong>
+                    <p>{{ booking.offer.title }}</p>
+                    <div class="booking-status">
+                      <span class="status-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                      <span class="booking-date">{{ booking.booking_date|date:"M d" }}</span>
+                    </div>
+                  </div>
+                  <div class="booking-actions">
+                    <a href="{% url 'booking_detail' booking.id %}" class="btn btn-outline btn-sm">View</a>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="section-footer">
+              <a href="{% url 'received_bookings' %}" class="btn btn-primary btn-sm">View All Bookings</a>
+            </div>
+          {% else %}
+            <div class="empty-state">
+              <p>No bookings yet.</p>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="dashboard-section">
+          <h2>Quick Actions</h2>
+          <div class="quick-actions">
+            <a href="{% url 'create_offer' %}" class="action-item">
+              <span class="action-icon">➕</span>
+              Create New Offer
+            </a>
+            <a href="{% url 'received_bookings' %}" class="action-item">
+              <span class="action-icon">📋</span>
+              Manage Bookings
+            </a>
+            <a href="{% url 'messages_list' %}" class="action-item">
+              <span class="action-icon">💬</span>
+              Messages
+              {% if dashboard_data.unread_messages %}
+                <span class="badge">{{ dashboard_data.unread_messages }}</span>
+              {% endif %}
+            </a>
+            <a href="{% url 'profile' %}" class="action-item">
+              <span class="action-icon">👤</span>
+              Update Profile
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.dashboard-header h1 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  color: #666;
+  font-weight: 600;
+}
+
+.dashboard-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+}
+
+.dashboard-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f8f9fa;
+}
+
+.section-header h2 {
+  color: #333;
+  margin: 0;
+}
+
+.offers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.offer-card {
+  display: grid;
+  grid-template-columns: 120px 1fr auto;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.offer-image {
+  width: 120px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.offer-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.offer-info h3 {
+  margin-bottom: 0.5rem;
+}
+
+.offer-info h3 a {
+  color: #333;
+  text-decoration: none;
+}
+
+.offer-info p {
+  color: #666;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.offer-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-approved { background: #d4edda; color: #155724; }
+.status-rejected { background: #f8d7da; color: #721c24; }
+
+.price {
+  font-weight: 700;
+  color: #28a745;
+}
+
+.spots {
+  color: #666;
+}
+
+.offer-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.bookings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.booking-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.booking-info p {
+  margin: 0.25rem 0;
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.booking-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.booking-date {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.action-item:hover {
+  background: #e9ecef;
+  text-decoration: none;
+  color: #333;
+}
+
+.action-icon {
+  font-size: 1.25rem;
+}
+
+.badge {
+  background: #dc3545;
+  color: white;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  margin-left: auto;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.section-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .offer-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+}
+</style>
+{% endblock %}

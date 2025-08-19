@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4 messages-page">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Messages</h2>
+    <div>
+      <a href="{% url 'send_message' %}" class="btn btn-primary">Compose</a>
+      <a href="{% url 'inbox' %}" class="btn btn-outline-secondary">Inbox</a>
+      <a href="{% url 'sent_messages' %}" class="btn btn-outline-secondary">Sent</a>
+    </div>
+  </div>
+
+  {% if page_obj and page_obj.object_list %}
+    <ul class="list-group messages-list">
+      {% for msg in page_obj.object_list %}
+        <li class="list-group-item d-flex justify-content-between align-items-start">
+          <div class="msg-summary">
+            <a href="{% url 'conversation' msg.sender.username %}" class="msg-subject"><strong>{{ msg.subject }}</strong></a>
+            <div class="msg-body small text-muted">{{ msg.body|truncatechars:140 }}</div>
+            <div class="msg-meta small text-muted">From <strong>{{ msg.sender.username }}</strong> · To <strong>{{ msg.recipient.username }}</strong> · {{ msg.created_at|date:"Y-m-d H:i" }}</div>
+          </div>
+          <div class="msg-actions text-end">
+            <a href="{% url 'conversation' msg.sender.username %}" class="btn btn-sm btn-link">Open</a>
+            <form method="post" action="{% url 'delete_message' msg.id %}" style="display:inline">{% csrf_token %}<button class="btn btn-sm btn-danger">Delete</button></form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <nav aria-label="Page navigation" class="mt-3 d-flex justify-content-center">
+      <ul class="pagination">
+        {% if page_obj.has_previous %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+        {% endif %}
+        <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+        {% if page_obj.has_next %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+
+  {% else %}
+    <div class="alert alert-light">No messages yet. Use "Compose" to send a new message.</div>
+  {% endif %}
+</div>
+{% endblock %}

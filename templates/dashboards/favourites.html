@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Favourites — Student Travels{% endblock %}
+
+{% block content %}
+<section class="section container">
+  <h1>My Favourites</h1>
+  {% if favourites %}
+    <div class="grid mt-1">
+      {% for fav in favourites %}
+        <div class="card">
+          {% if fav.offer.image %}
+            <img src="{{ fav.offer.image.url }}" alt="{{ fav.offer.title }}">
+          {% else %}
+            <img src="{% static 'images/gold-coast-sunny.jpg' %}" alt="{{ fav.offer.title }}">
+          {% endif %}
+          <div class="card-body">
+            <h4><a href="{% url 'offer_detail' fav.offer.id %}">{{ fav.offer.title }}</a></h4>
+            <p class="small">{{ fav.offer.destination }}</p>
+            <div class="price-row">
+              <div class="price-new">${{ fav.offer.price }}</div>
+              {% if fav.offer.original_price %}
+                <div class="price-old">${{ fav.offer.original_price }}</div>
+              {% endif %}
+            </div>
+            <div class="mt-1 card-footer">
+              <div class="actions">
+                <a href="{% url 'offer_detail' fav.offer.id %}" class="btn btn-outline">View</a>
+                <a href="/favourites/{{ fav.offer.id }}/toggle/" class="btn btn-light">Toggle</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-light">You have no favourites yet.</div>
+  {% endif %}
+</section>
+{% endblock %}

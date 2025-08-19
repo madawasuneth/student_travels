@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4 send-message-page">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Send Message</h2>
+    <a href="{% url 'messages_list' %}" class="btn btn-link">Back</a>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label">To</label>
+          <input type="text" name="to_username" class="form-control" value="{{ to_username }}" readonly>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Subject</label>
+          <input type="text" name="subject" class="form-control" placeholder="Subject">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Message</label>
+          <textarea name="body" class="form-control" rows="5" placeholder="Write your message..."></textarea>
+        </div>
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-primary">Send</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

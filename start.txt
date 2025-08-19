@@ -1,0 +1,1 @@
+/Users/thinkcubemacsupport/workspace/MIS-202-Project/.venv/bin/python /Users/thinkcubemacsupport/workspace/MIS-202-Project/student_travels_backend/manage.py runserver 0.0.0.0:8000

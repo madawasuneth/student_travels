@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}{{ offer.title }} — Student Travels{% endblock %}
+
+{% block content %}
+<section class="section container">
+  <div class="offer-detail">
+    <div class="offer-header">
+      <div class="breadcrumb">
+        <a href="{% url 'home' %}">Home</a> > 
+        <a href="{% url 'offers_list' %}">All Offers</a> > 
+        <span>{{ offer.title }}</span>
+      </div>
+      
+      <div class="offer-main">
+        <div class="offer-image">
+          {% if offer.image %}
+            <img src="{{ offer.image.url }}" alt="{{ offer.title }}">
+          {% else %}
+            <img src="{% static 'images/gold-coast-sunny.jpg' %}" alt="{{ offer.title }}">
+          {% endif %}
+        </div>
+        
+        <div class="offer-info">
+          <div class="offer-category">{{ offer.category.name }}</div>
+          <h1>{{ offer.title }}</h1>
+          
+          <div class="offer-meta">
+            <div class="meta-item">
+              <strong>📍 Destination:</strong> {{ offer.destination }}
+            </div>
+            <div class="meta-item">
+              <strong>📅 Dates:</strong> {{ offer.start_date|date:"M d, Y" }} - {{ offer.end_date|date:"M d, Y" }}
+            </div>
+            <div class="meta-item">
+              <strong>👥 Available Spots:</strong> {{ offer.available_spots }}
+            </div>
+            <div class="meta-item">
+              <strong>🏢 Advertiser:</strong> {{ offer.advertiser.get_full_name|default:offer.advertiser.username }}
+            </div>
+          </div>
+          
+          <div class="pricing">
+            {% if offer.original_price and offer.discount_percentage %}
+              <div class="original-price">${{ offer.original_price }}</div>
+              <div class="current-price">${{ offer.price }}</div>
+              <div class="discount-badge">{{ offer.discount_percentage }}% OFF</div>
+            {% else %}
+              <div class="current-price">${{ offer.price }}</div>
+            {% endif %}
+          </div>
+          
+          <div class="action-buttons">
+            {% if user.is_authenticated %}
+              {% user_role user as role %}
+              {% if role == 'student' %}
+                {% if user_booking %}
+                  <div class="booking-status">
+                    <p><strong>Your Booking Status:</strong> 
+                      <span class="status-badge status-{{ user_booking.status }}">
+                        {{ user_booking.get_status_display }}
+                      </span>
+                    </p>
+                    <a href="{% url 'booking_detail' user_booking.id %}" class="btn btn-outline">View Booking</a>
+                  </div>
+                {% elif offer.is_available %}
+                  <a href="{% url 'create_booking' offer.id %}" class="btn btn-primary btn-lg">Book Now</a>
+                {% else %}
+                  <button class="btn btn-secondary" disabled>Not Available</button>
+                {% endif %}
+                
+                <button onclick="toggleFav({{ offer.id }})" class="btn btn-light fav-btn">
+                  {% if is_favourite %}♥ Remove from Favourites{% else %}♡ Add to Favourites{% endif %}
+                </button>
+              {% endif %}
+              
+              <a href="{% url 'send_message' %}?to={{ offer.advertiser.username }}&offer={{ offer.id }}" class="btn btn-outline">
+                💬 Message Advertiser
+              </a>
+            {% else %}
+              <p><a href="#" id="loginToBook">Log in to book this offer</a></p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="offer-content">
+      <div class="offer-description">
+        <h2>Description</h2>
+        <p>{{ offer.description|linebreaks }}</p>
+      </div>
+      
+      {% if reviews %}
+      <div class="offer-reviews">
+        <h2>Reviews 
+          {% if rating_data.avg_rating %}
+            <span class="rating-summary">
+              {{ rating_data.avg_rating|floatformat:1 }}★ 
+              ({{ rating_data.total_reviews }} review{{ rating_data.total_reviews|pluralize }})
+            </span>
+          {% endif %}
+        </h2>
+        
+        <div class="reviews-list">
+          {% for review in reviews %}
+            <div class="review">
+              <div class="review-header">
+                <strong>{{ review.booking.student.get_full_name|default:review.booking.student.username }}</strong>
+                <span class="rating">{{ review.rating|stars }}</span>
+                <span class="date">{{ review.created_at|date:"M d, Y" }}</span>
+              </div>
+              {% if review.comment %}
+                <p class="review-comment">{{ review.comment }}</p>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.offer-detail {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.breadcrumb {
+  margin-bottom: 2rem;
+  color: #666;
+}
+
+.breadcrumb a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.offer-main {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+
+.offer-image img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.offer-category {
+  background: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.offer-info h1 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.offer-meta {
+  margin-bottom: 2rem;
+}
+
+.meta-item {
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.pricing {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.original-price {
+  font-size: 1.25rem;
+  text-decoration: line-through;
+  color: #666;
+}
+
+.current-price {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #28a745;
+}
+
+.discount-badge {
+  background: #dc3545;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.booking-status {
+  padding: 1rem;
+  background: #e3f2fd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.status-badge {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+.status-completed { background: #cce5ff; color: #004085; }
+
+.offer-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+}
+
+.offer-description h2,
+.offer-reviews h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.rating-summary {
+  color: #ffc107;
+  font-size: 1.25rem;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.review {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.rating {
+  color: #ffc107;
+}
+
+.date {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+.review-comment {
+  margin-top: 0.5rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .offer-main,
+  .offer-content {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+}
+</style>
+{% endblock %}

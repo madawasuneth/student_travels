@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4 conversation-page">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="m-0">Conversation with {{ other_user.username }}</h2>
+    <a href="{% url 'messages_list' %}" class="btn btn-link">Back</a>
+  </div>
+
+  <div class="conversation-list mb-4">
+    {% for m in conversation %}
+      <div class="message-item {% if m.sender == request.user %}mine{% else %}theirs{% endif %}">
+        <div class="message-subject small text-muted">{{ m.subject }}</div>
+        <div class="message-body">{{ m.body|linebreaksbr }}</div>
+        <div class="message-meta small text-muted">{{ m.sender.username }} · {{ m.created_at|date:"Y-m-d H:i" }}</div>
+      </div>
+    {% empty %}
+      <div class="alert alert-light">No messages in this conversation.</div>
+    {% endfor %}
+  </div>
+
+  <div class="reply-box">
+    <h4 class="h6">Reply</h4>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <label class="form-label visually-hidden">Message</label>
+        <textarea name="body" class="form-control" rows="4" placeholder="Write your reply..."></textarea>
+      </div>
+      <div class="d-flex justify-content-end">
+        <button class="btn btn-primary">Send Reply</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

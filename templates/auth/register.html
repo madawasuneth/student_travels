@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register — Student Travels{% endblock %}
+
+{% block content %}
+<section class="section container">
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1>Register</h1>
+      <p>Join Student Travels and start exploring!</p>
+      
+      <form method="post" class="auth-form">
+        {% csrf_token %}
+        
+        <div class="form-control">
+          <label for="{{ form.username.id_for_label }}">Username</label>
+          {{ form.username }}
+        </div>
+        
+        <div class="form-control">
+          <label for="{{ form.email.id_for_label }}">Email</label>
+          {{ form.email }}
+        </div>
+        
+        <div class="form-control">
+          <label for="{{ form.password1.id_for_label }}">Password</label>
+          {{ form.password1 }}
+        </div>
+        
+        <div class="form-control">
+          <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+          {{ form.password2 }}
+        </div>
+        
+        <div class="form-control">
+          <label for="{{ form.role.id_for_label }}">I am a:</label>
+          {{ form.role }}
+        </div>
+        
+        <div class="form-control">
+          <label for="{{ form.phone.id_for_label }}">Phone (Optional)</label>
+          {{ form.phone }}
+        </div>
+        
+        <div class="form-control">
+          <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth (Optional)</label>
+          {{ form.date_of_birth }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-full">Register</button>
+      </form>
+      
+      <div class="auth-footer">
+        <p>Already have an account? <a href="{% url 'login' %}">Log in here</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.auth-card {
+  background: white;
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  width: 100%;
+  max-width: 450px;
+  text-align: center;
+}
+
+.auth-card h1 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.auth-card p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.auth-form {
+  text-align: left;
+}
+
+.form-control {
+  margin-bottom: 1.5rem;
+}
+
+.form-control label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-control input,
+.form-control select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.form-control input:focus,
+.form-control select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.auth-footer {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+.auth-footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.auth-footer a:hover {
+  text-decoration: underline;
+}
+
+.errorlist {
+  color: #dc3545;
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0 0;
+  font-size: 0.875rem;
+}
+</style>
+{% endblock %}

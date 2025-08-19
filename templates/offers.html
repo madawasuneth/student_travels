@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}All Offers — Student Travels{% endblock %}
+
+{% block content %}
+<main class="section container">
+  <h2>All Offers</h2>
+  <div id="offersGrid" class="grid mt-1">
+    {% for offer in page_obj %}
+      <article class="card">
+        {% if offer.image %}
+          <img src="{{ offer.image.url }}" alt="{{ offer.destination }}">
+        {% else %}
+          <img src="{% static 'images/gold-coast-sunny.jpg' %}" alt="{{ offer.destination }}">
+        {% endif %}
+        <div class="card-body">
+          <div class="row">
+            <span>
+              <span class="badge {% if offer.original_price %}pack{% else %}flight{% endif %}">{{ offer.category.name }}</span>
+            </span>
+            <span class="small">Expires: {{ offer.end_date }}</span>
+          </div>
+          <h3 style="margin:.2rem 0">{{ offer.title }}</h3>
+          <div class="small">{{ offer.destination }}</div>
+          <div class="price-row">
+            <div class="price-new">${{ offer.price|floatformat:0 }}</div>
+            {% if offer.original_price %}
+              <div class="price-old">${{ offer.original_price|floatformat:0 }}</div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="small">{{ offer.start_date }} • {{ offer.available_spots }} spot{{ offer.available_spots|pluralize }}</span>
+          <div class="actions">
+            <button class="btn btn-primary" data-book="offer_{{ offer.id }}">Book</button>
+            <a class="btn" href="{% url 'offer_detail' offer.id %}">View</a>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <div class="no-results">
+        <h3>No offers found</h3>
+        <p>Try adjusting your filters or check back later.</p>
+      </div>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.offers-grid {
+  display: grid;
+  /* show 4 cards per row on desktop, responsive to 2/1 on smaller screens */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 900px) {
+  .offers-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .offers-grid { grid-template-columns: 1fr; }
+}
+
+.filter-form {
+  background: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.results-header {
+  margin: 2rem 0 1rem 0;
+}
+
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  grid-column: 1 / -1;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.page-info {
+  margin: 0 1rem;
+  font-weight: 600;
+}
+
+.card-badge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.card {
+  position: relative;
+}
+</style>
+{% endblock %}

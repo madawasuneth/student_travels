@@ -1,0 +1,188 @@
+[
+    {
+        "model": "core.category",
+        "pk": 1,
+        "fields": {
+            "name": "City Breaks",
+            "description": "Short city trips and urban adventures",
+            "created_at": "2024-01-15T10:00:00Z"
+        }
+    },
+    {
+        "model": "core.category",
+        "pk": 2,
+        "fields": {
+            "name": "Beach & Islands",
+            "description": "Beach holidays and island getaways",
+            "created_at": "2024-01-15T10:05:00Z"
+        }
+    },
+    {
+        "model": "core.category",
+        "pk": 3,
+        "fields": {
+            "name": "Adventure Tours",
+            "description": "Outdoor activities and adventure experiences",
+            "created_at": "2024-01-15T10:10:00Z"
+        }
+    },
+    {
+        "model": "core.category",
+        "pk": 4,
+        "fields": {
+            "name": "Cultural Tours",
+            "description": "Cultural experiences and heritage sites",
+            "created_at": "2024-01-15T10:15:00Z"
+        }
+    },
+    {
+        "model": "core.category",
+        "pk": 5,
+        "fields": {
+            "name": "Food & Wine",
+            "description": "Culinary experiences and wine tours",
+            "created_at": "2024-01-15T10:20:00Z"
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 2,
+        "fields": {
+            "username": "advertiser1",
+            "email": "advertiser1@example.com",
+            "first_name": "John",
+            "last_name": "Smith",
+            "is_staff": false,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$390000$demo_password_hash",
+            "date_joined": "2024-01-15T11:00:00Z"
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 3,
+        "fields": {
+            "username": "student1",
+            "email": "student1@example.com",
+            "first_name": "Jane",
+            "last_name": "Doe",
+            "is_staff": false,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$390000$demo_password_hash",
+            "date_joined": "2024-01-15T11:05:00Z"
+        }
+    },
+    {
+        "model": "auth.user",
+        "pk": 4,
+        "fields": {
+            "username": "moderator1",
+            "email": "moderator1@example.com",
+            "first_name": "Mike",
+            "last_name": "Wilson",
+            "is_staff": true,
+            "is_superuser": false,
+            "password": "pbkdf2_sha256$390000$demo_password_hash",
+            "date_joined": "2024-01-15T11:10:00Z"
+        }
+    },
+    {
+        "model": "core.userprofile",
+        "pk": 1,
+        "fields": {
+            "user": 2,
+            "role": "advertiser",
+            "phone": "+61 400 123 456",
+            "created_at": "2024-01-15T11:15:00Z",
+            "updated_at": "2024-01-15T11:15:00Z"
+        }
+    },
+    {
+        "model": "core.userprofile",
+        "pk": 2,
+        "fields": {
+            "user": 3,
+            "role": "student",
+            "phone": "+61 400 789 012",
+            "created_at": "2024-01-15T11:20:00Z",
+            "updated_at": "2024-01-15T11:20:00Z"
+        }
+    },
+    {
+        "model": "core.userprofile",
+        "pk": 3,
+        "fields": {
+            "user": 4,
+            "role": "moderator",
+            "phone": "+61 400 345 678",
+            "created_at": "2024-01-15T11:25:00Z",
+            "updated_at": "2024-01-15T11:25:00Z"
+        }
+    },
+    {
+        "model": "core.traveloffer",
+        "pk": 1,
+        "fields": {
+            "title": "Gold Coast Adventure Package",
+            "description": "Experience the best of Gold Coast with theme parks, beaches, and nightlife. Perfect for students looking for an action-packed getaway.",
+            "destination": "Gold Coast, QLD",
+            "category": 2,
+            "advertiser": 2,
+            "price": 450.00,
+            "original_price": 600.00,
+            "discount_percentage": 25,
+            "start_date": "2024-03-15",
+            "end_date": "2024-03-18",
+            "available_spots": 20,
+            "image": "images/gold-coast-sunny.jpg",
+            "status": "active",
+            "featured": true,
+            "created_at": "2024-01-15T12:00:00Z",
+            "updated_at": "2024-01-15T12:00:00Z"
+        }
+    },
+    {
+        "model": "core.traveloffer",
+        "pk": 2,
+        "fields": {
+            "title": "Uluru Spiritual Journey",
+            "description": "Discover the heart of Australia with this cultural experience at Uluru. Includes guided tours and traditional Aboriginal experiences.",
+            "destination": "Uluru, NT",
+            "category": 4,
+            "advertiser": 2,
+            "price": 780.00,
+            "original_price": 980.00,
+            "discount_percentage": 20,
+            "start_date": "2024-04-10",
+            "end_date": "2024-04-13",
+            "available_spots": 15,
+            "image": "images/uluru.jpg",
+            "status": "active",
+            "featured": false,
+            "created_at": "2024-01-15T12:30:00Z",
+            "updated_at": "2024-01-15T12:30:00Z"
+        }
+    },
+    {
+        "model": "core.traveloffer",
+        "pk": 3,
+        "fields": {
+            "title": "Byron Bay Surf & Relax",
+            "description": "Perfect beach getaway with surf lessons, yoga sessions, and beach parties. Great for students wanting to unwind.",
+            "destination": "Byron Bay, NSW",
+            "category": 2,
+            "advertiser": 2,
+            "price": 350.00,
+            "original_price": 420.00,
+            "discount_percentage": 17,
+            "start_date": "2024-02-20",
+            "end_date": "2024-02-23",
+            "available_spots": 25,
+            "image": "images/byron-bay.jpg",
+            "status": "active",
+            "featured": true,
+            "created_at": "2024-01-15T13:00:00Z",
+            "updated_at": "2024-01-15T13:00:00Z"
+        }
+    }
+]

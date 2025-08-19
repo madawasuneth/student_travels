@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}Student Travels — Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div class="hero-card">
+    <div class="row">
+      <div class="segmented" role="tablist">
+        <input
+          id="segFlights"
+          type="radio"
+          name="otype"
+          value="flight"
+          checked
+        /><label for="segFlights">Flights</label>
+        <input id="segPacks" type="radio" name="otype" value="pack" /><label
+          for="segPacks"
+          >Flights + Accommodation</label
+        >
+      </div>
+    </div>
+    <h1>Student‑discounted domestic travel across Australia</h1>
+    <p class="small">
+      Search verified flight and package offers. Book now, pay student prices.
+    </p>
+    <form method="GET" action="{% url 'offers_list' %}" class="search-row">
+      <div class="form-control">
+        <label for="sOrigin">Origin</label>
+        <select id="sOrigin" name="origin">
+          <option value="">Any</option>
+          <option>Sydney</option>
+          <option>Melbourne</option>
+          <option>Brisbane</option>
+          <option>Perth</option>
+          <option>Adelaide</option>
+          <option>Hobart</option>
+          <option>Darwin</option>
+          <option>Canberra</option>
+        </select>
+      </div>
+      <div class="form-control">
+        <label for="sDest">Destination</label>
+        <input type="text" id="sDest" name="query" placeholder="Search destinations...">
+      </div>
+      <div class="form-control">
+        <label for="sMax">Max price</label>
+        <select id="sMax" name="max_price">
+          <option value="">Any</option>
+          <option value="200">$200</option>
+          <option value="300">$300</option>
+          <option value="400">$400</option>
+          <option value="500">$500</option>
+        </select>
+      </div>
+      <div class="form-control" style="align-self:end">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section class="section container">
+  <h2>Featured offers</h2>
+  <div id="featured" class="grid">
+    {% for offer in featured_offers %}
+    <article class="card">
+      <img src="{{ offer.static_image }}" alt="{{ offer.destination|default:offer.title }}">
+      <div class="card-body">
+        <div class="row">
+          <span>
+            <span class="badge {% if 'pack' in offer.title|lower or 'stay' in offer.title|lower %}pack{% else %}flight{% endif %}">
+              {% if 'pack' in offer.title|lower or 'stay' in offer.title|lower %}Flights + Stay{% else %}Flight{% endif %}
+            </span>
+          </span>
+          <span class="small">Expires: {{ offer.end_date|date:"Y-m-d" }}</span>
+        </div>
+        <h3 style="margin:.2rem 0">{{ offer.title }}</h3>
+        <div class="small">{{ offer.destination }}</div>
+        <div class="price-row">
+          <div class="price-new">${{ offer.price|floatformat:0 }}</div>
+          {% if offer.original_price %}<div class="price-old">${{ offer.original_price|floatformat:0 }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="small">&nbsp;</span>
+        <div class="actions">
+          <button class="btn btn-primary" data-book="offer_{{ offer.pk }}">Book</button>
+          <a class="btn" href="{% url 'offer_detail' offer.pk %}">View</a>
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <p>No featured offers right now.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pages/home.js' %}"></script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+{% endblock %}

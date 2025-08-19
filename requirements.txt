@@ -1,0 +1,6 @@
+Django==4.2.23
+python-dotenv==1.0.1
+Pillow==10.4.0
+mysqlclient==2.2.0
+# alternative pure-Python driver (uncomment to use):
+# mysql-connector-python==8.0.34

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2>Admin Dashboard</h2>
+
+  <div class="row">
+    <div class="col-md-4">
+      <h4>Summary</h4>
+      <ul class="list-group">
+        <li class="list-group-item">Total offers: {{ dashboard_data.offers_count }}</li>
+        <li class="list-group-item">Total users: {{ dashboard_data.users_count }}</li>
+        <li class="list-group-item">Pending bookings: {{ dashboard_data.pending_bookings }}</li>
+      </ul>
+    </div>
+
+    <div class="col-md-8">
+      <h4>Recent Users</h4>
+      <ul class="list-group mb-3">
+        {% for user in recent_users %}
+          <li class="list-group-item">{{ user.username }} — {{ user.email }} <small class="text-muted">joined {{ user.date_joined }}</small></li>
+        {% empty %}
+          <li class="list-group-item">No recent users</li>
+        {% endfor %}
+      </ul>
+
+      <h4>Recent Offers (Pending)</h4>
+      <ul class="list-group mb-3">
+        {% for offer in recent_offers %}
+          <li class="list-group-item">{{ offer.title }} — {{ offer.advertiser.username }} <span class="badge bg-secondary">{{ offer.status }}</span></li>
+        {% empty %}
+          <li class="list-group-item">No recent offers</li>
+        {% endfor %}
+      </ul>
+
+      <h4>Recent Booking Stats</h4>
+      {% if recent_bookings %}
+        <table class="table">
+          <thead>
+            <tr><th>Metric</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            {% for key, value in recent_bookings.items %}
+              <tr><td>{{ key }}</td><td>{{ value }}</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p>No booking statistics available.</p>
+      {% endif %}
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

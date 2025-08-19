@@ -1,0 +1,285 @@
+{% load static %}
+{% load role_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Student Travels{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="{% url 'home' %}" class="brand"><span class="brand-name">Student Travels</span></a>
+      <nav class="main-nav">
+        <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">Home</a>
+        <a href="{% url 'offers_list' %}" class="{% if 'offers' in request.resolver_match.url_name %}active{% endif %}">All Offers</a>
+        {% if user.is_authenticated %}
+          {% user_role user as role %}
+          {% if role == 'advertiser' %}
+            <a href="{% url 'create_offer' %}">Create Offer</a>
+          {% endif %}
+          <a href="{% url 'dashboard' %}">Dashboard</a>
+          <a href="{% url 'messages_list' %}">
+            Messages
+            {% unread_message_count user as unread %}
+            {% if unread > 0 %}
+              <span class="badge">{{ unread }}</span>
+            {% endif %}
+          </a>
+        {% endif %}
+      </nav>
+      <div class="auth-actions">
+        {% if user.is_authenticated %}
+          <div class="user-menu">
+            <span>Hello, {{ user.first_name|default:user.username }}!</span>
+            <a href="{% url 'profile' %}" class="btn btn-secondary">Profile</a>
+            <a href="{% url 'logout' %}" class="btn btn-outline">Logout</a>
+          </div>
+        {% else %}
+          <a href="{% url 'login' %}" id="btnLogin" class="btn btn-outline">Log in</a>
+          <a href="{% url 'register' %}" id="btnRegister" class="btn btn-primary">Register</a>
+        {% endif %}
+      </div>
+      <button id="btnMenu" class="btn btn-icon" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <aside id="menu-drawer" class="menu-drawer" aria-hidden="true">
+    <nav class="drawer-nav" aria-label="Mobile">
+      <a href="{% url 'home' %}" class="drawer-link">Home</a>
+      <a href="{% url 'offers_list' %}" class="drawer-link">All Offers</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="drawer-link">Dashboard</a>
+        <a href="{% url 'messages_list' %}" class="drawer-link">Messages</a>
+        <a href="{% url 'profile' %}" class="drawer-link">Profile</a>
+        <a href="{% url 'logout' %}" class="drawer-link">Logout</a>
+      {% else %}
+        <a href="{% url 'login' %}" class="drawer-link" id="mobileLogin">Log in</a>
+        <a href="{% url 'register' %}" class="drawer-link" id="mobileRegister">Register</a>
+      {% endif %}
+    </nav>
+  </aside>
+
+  <!-- Login Modal -->
+  {% if not user.is_authenticated %}
+  <div id="loginModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Log In</h2>
+      <form id="loginForm" onsubmit="loginSubmit(event)">
+        {% csrf_token %}
+        <div class="form-control">
+          <label for="loginUsername">Username</label>
+          <input type="text" id="loginUsername" name="username" required>
+        </div>
+        <div class="form-control">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Log In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+  <div id="registerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Register</h2>
+      <form id="registerForm" onsubmit="registerSubmit(event)">
+        {% csrf_token %}
+        <div class="form-control">
+          <label for="regUsername">Username</label>
+          <input type="text" id="regUsername" name="username" required>
+        </div>
+        <div class="form-control">
+          <label for="regEmail">Email</label>
+          <input type="email" id="regEmail" name="email" required>
+        </div>
+        <div class="form-control">
+          <label for="regPassword1">Password</label>
+          <input type="password" id="regPassword1" name="password1" required>
+        </div>
+        <div class="form-control">
+          <label for="regPassword2">Confirm Password</label>
+          <input type="password" id="regPassword2" name="password2" required>
+        </div>
+        <div class="form-control">
+          <label for="regRole">I am a:</label>
+          <select id="regRole" name="role">
+            <option value="student">Student</option>
+            <option value="advertiser">Advertiser</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Register</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Flash / toast messages -->
+  <div id="flash-messages" aria-live="polite" aria-atomic="true" class="toast-container">
+    {% for message in messages %}
+      <div class="toast toast-{{ message.tags }}" role="status" data-duration="4500">
+        <div class="toast-body">{{ message }}</div>
+        <button class="toast-close" aria-label="Close">&times;</button>
+      </div>
+    {% endfor %}
+  </div>
+
+  <script>
+    (function(){
+      document.addEventListener('click', function(e){
+        if(e.target && e.target.classList.contains('toast-close')){
+          const toast = e.target.closest('.toast');
+          toast && toast.classList.add('hide');
+        }
+      });
+
+      window.addEventListener('load', function(){
+        const container = document.getElementById('flash-messages');
+        if(!container) return;
+        container.querySelectorAll('.toast').forEach(function(t){
+          const dur = parseInt(t.dataset.duration || 4000, 10);
+          setTimeout(function(){ t.classList.add('hide'); }, dur);
+        });
+      });
+    })();
+  </script>
+
+  <main id="app" class="app-root" aria-live="polite">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> Student Travels — Domestic student travel offers across Australia.</p>
+      <nav class="footer-nav">
+        <a href="#">Terms</a> 
+        <a href="#">Privacy</a> 
+        <a href="#">Contact</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/seed.js' %}"></script>
+  <script src="{% static 'js/state.js' %}"></script>
+  <script src="{% static 'js/common.js' %}"></script>
+  
+  {% if not user.is_authenticated %}
+  <script>
+    async function loginSubmit(e){
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const resp = await fetch("{% url 'ajax_login' %}", {
+        method: "POST",
+        headers: {"X-CSRFToken": "{{ csrf_token }}"},
+        body: data
+      });
+      const json = await resp.json();
+      if(json.ok){ 
+        location.reload(); 
+      } else { 
+        alert(json.error || "Login failed"); 
+      }
+    }
+
+    async function registerSubmit(e){
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const resp = await fetch("{% url 'ajax_register' %}", {
+        method: "POST",
+        headers: {"X-CSRFToken": "{{ csrf_token }}"},
+        body: data
+      });
+      const json = await resp.json();
+      if(json.ok){ 
+        location.reload(); 
+      } else { 
+        alert(json.error || "Register failed"); 
+      }
+    }
+
+    // Modal functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      const loginBtn = document.getElementById('btnLogin');
+      const registerBtn = document.getElementById('btnRegister');
+      const loginModal = document.getElementById('loginModal');
+      const registerModal = document.getElementById('registerModal');
+      const mobileLogin = document.getElementById('mobileLogin');
+      const mobileRegister = document.getElementById('mobileRegister');
+
+      if (loginBtn) {
+        loginBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          loginModal.style.display = 'block';
+        });
+      }
+
+      if (registerBtn) {
+        registerBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          registerModal.style.display = 'block';
+        });
+      }
+
+      if (mobileLogin) {
+        mobileLogin.addEventListener('click', function(e) {
+          e.preventDefault();
+          loginModal.style.display = 'block';
+        });
+      }
+
+      if (mobileRegister) {
+        mobileRegister.addEventListener('click', function(e) {
+          e.preventDefault();
+          registerModal.style.display = 'block';
+        });
+      }
+
+      // Close modals
+      document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', function() {
+          this.closest('.modal').style.display = 'none';
+        });
+      });
+
+      // Close modal when clicking outside
+      window.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+          e.target.style.display = 'none';
+        }
+      });
+    });
+  </script>
+  {% endif %}
+
+  {% if user.is_authenticated %}
+  <script>
+    async function toggleFav(id){
+      const resp = await fetch(`/favourites/${id}/toggle/`, { 
+        headers: {"X-Requested-With": "XMLHttpRequest"} 
+      });
+      const json = await resp.json();
+      if (json.is_favourite) {
+        // Update UI to show favourited
+        document.querySelector(`[data-offer-id="${id}"] .fav-btn`).innerHTML = '♥';
+      } else {
+        // Update UI to show not favourited
+        document.querySelector(`[data-offer-id="${id}"] .fav-btn`).innerHTML = '♡';
+      }
+    }
+  </script>
+  {% endif %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

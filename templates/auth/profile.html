@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4 profile-page">
+  <div class="profile-card">
+    <div class="profile-header d-flex align-items-center">
+      <div class="avatar">
+        {% if profile.profile_picture %}
+          <img src="{{ profile.profile_picture.url }}" alt="Profile picture" class="rounded-circle">
+        {% else %}
+          <img src="{% static 'images/default_profile.png' %}" alt="Default profile" class="rounded-circle">
+        {% endif %}
+      </div>
+      <div class="profile-meta ms-3">
+        <h2 class="m-0">{{ request.user.get_full_name|default:request.user.username }}</h2>
+        <div class="small text-muted">@{{ request.user.username }}</div>
+        <div class="mt-2">
+          <span class="badge role-badge">{{ role|title }}</span>
+        </div>
+      </div>
+      <div class="ms-auto">
+        <a href="{% url 'profile' %}" class="btn btn-outline-secondary">Edit Profile</a>
+      </div>
+    </div>
+
+    <div class="profile-body row mt-3">
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h5>Contact</h5>
+          <p class="small"><strong>Email:</strong> {{ request.user.email }}</p>
+          {% if profile.phone %}<p class="small"><strong>Phone:</strong> {{ profile.phone }}</p>{% endif %}
+          {% if profile.university %}<p class="small"><strong>University:</strong> {{ profile.university }}</p>{% endif %}
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="card p-3">
+          <h5>About</h5>
+          <p class="small">{{ profile.bio|default:"No bio yet. Add something about yourself." }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-edit mt-3">
+      <form method="post" enctype="multipart/form-data" class="row g-3">
+        {% csrf_token %}
+        <div class="col-md-6">
+          {{ form.first_name.label_tag }}
+          {{ form.first_name }}
+        </div>
+        <div class="col-md-6">
+          {{ form.last_name.label_tag }}
+          {{ form.last_name }}
+        </div>
+        <div class="col-md-6">
+          {{ form.phone.label_tag }}
+          {{ form.phone }}
+        </div>
+        <div class="col-md-6">
+          {{ form.profile_picture.label_tag }}
+          {{ form.profile_picture }}
+        </div>
+        <div class="col-12">
+          {{ form.bio.label_tag }}
+          {{ form.bio }}
+        </div>
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-primary">Save profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
