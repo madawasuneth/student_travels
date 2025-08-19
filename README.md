@@ -16,10 +16,12 @@ A Django-based web application for managing student travel offers and bookings.
    source .venv/bin/activate
    ```
 
-3. **Install dependencies**
+3. **Install Django and other dependencies**
    ```bash
    pip install -r requirements.txt
+   pip install django
    ```
+
 
 4. **Configure environment variables**
    - Copy `.env.example` to `.env` and update values as needed.
