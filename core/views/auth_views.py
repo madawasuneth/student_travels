@@ -60,6 +60,9 @@ def home_view(request):
 @require_http_methods(["POST"])
 def ajax_login(request):
     """AJAX login endpoint"""
+    # If already authenticated, don't allow logging in again
+    if request.user.is_authenticated:
+        return JsonResponse({'ok': False, 'error': 'Already authenticated', 'redirect': '/'})
     try:
         data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
         username = data.get('username')
@@ -82,6 +85,9 @@ def ajax_login(request):
 @require_http_methods(["POST"])
 def ajax_register(request):
     """AJAX registration endpoint"""
+    # If already authenticated, don't allow registering again
+    if request.user.is_authenticated:
+        return JsonResponse({'ok': False, 'error': 'Already authenticated', 'redirect': '/'})
     try:
         data = json.loads(request.body) if request.content_type == 'application/json' else request.POST
         
@@ -101,6 +107,11 @@ def ajax_register(request):
 
 def login_view(request):
     """Traditional login view"""
+    # Redirect authenticated users away from the login page
+    if request.user.is_authenticated:
+        next_url = request.GET.get('next', '/')
+        return redirect(next_url)
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -118,6 +129,10 @@ def login_view(request):
 
 def register_view(request):
     """Traditional registration view"""
+    # Redirect authenticated users away from the registration page
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():

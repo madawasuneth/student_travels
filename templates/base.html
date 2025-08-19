@@ -34,7 +34,7 @@
           </a>
         {% endif %}
       </nav>
-      <div class="auth-actions">
+  <div class="auth-actions" data-server-auth="{{ user.is_authenticated|yesno:'true,false' }}">
         {% if user.is_authenticated %}
           <div class="user-menu">
             <span>Hello, {{ user.first_name|default:user.username }}!</span>
@@ -174,17 +174,31 @@
   
   {% if not user.is_authenticated %}
   <script>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
     async function loginSubmit(e){
       e.preventDefault();
       const form = e.target;
       const data = new FormData(form);
+      const csrftoken = getCookie('csrftoken');
       const resp = await fetch("{% url 'ajax_login' %}", {
         method: "POST",
-        headers: {"X-CSRFToken": "{{ csrf_token }}"},
+        credentials: 'same-origin',
+        headers: {"X-CSRFToken": csrftoken},
         body: data
       });
       const json = await resp.json();
+      // If server provides a redirect, navigate there
+      if (json.redirect) {
+        window.location.href = json.redirect;
+        return;
+      }
       if(json.ok){ 
+        // successful login — reload to update UI
         location.reload(); 
       } else { 
         alert(json.error || "Login failed"); 
@@ -195,12 +209,19 @@
       e.preventDefault();
       const form = e.target;
       const data = new FormData(form);
+      const csrftoken = getCookie('csrftoken');
       const resp = await fetch("{% url 'ajax_register' %}", {
         method: "POST",
-        headers: {"X-CSRFToken": "{{ csrf_token }}"},
+        credentials: 'same-origin',
+        headers: {"X-CSRFToken": csrftoken},
         body: data
       });
       const json = await resp.json();
+      // If server provides a redirect, navigate there
+      if (json.redirect) {
+        window.location.href = json.redirect;
+        return;
+      }
       if(json.ok){ 
         location.reload(); 
       } else { 
@@ -217,31 +238,47 @@
       const mobileLogin = document.getElementById('mobileLogin');
       const mobileRegister = document.getElementById('mobileRegister');
 
+
+      // Only open modals on home page
+      function isHomePage() {
+        return window.location.pathname === '/';
+      }
+
       if (loginBtn) {
         loginBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          loginModal.style.display = 'block';
+          if (isHomePage()) {
+            e.preventDefault();
+            loginModal.style.display = 'block';
+          }
+          // else: let default navigation happen
         });
       }
 
       if (registerBtn) {
         registerBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          registerModal.style.display = 'block';
+          if (isHomePage()) {
+            e.preventDefault();
+            registerModal.style.display = 'block';
+          }
+          // else: let default navigation happen
         });
       }
 
       if (mobileLogin) {
         mobileLogin.addEventListener('click', function(e) {
-          e.preventDefault();
-          loginModal.style.display = 'block';
+          if (isHomePage()) {
+            e.preventDefault();
+            loginModal.style.display = 'block';
+          }
         });
       }
 
       if (mobileRegister) {
         mobileRegister.addEventListener('click', function(e) {
-          e.preventDefault();
-          registerModal.style.display = 'block';
+          if (isHomePage()) {
+            e.preventDefault();
+            registerModal.style.display = 'block';
+          }
         });
       }
 

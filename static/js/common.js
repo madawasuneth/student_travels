@@ -26,13 +26,16 @@ window.UI = (function(){
   function renderHeaderAuth(){
     const row = $('.auth-actions');
     if(!row) return;
+  // If server-side rendered auth UI exists, do not overwrite it.
+  if (row.dataset && row.dataset.serverAuth === 'true') return;
     const me = window.ST.getAuth();
     if(me){
   const dest = me.role==='student'?'/dashboard/student/': me.role==='advertiser'?'/dashboard/advertiser/': me.role==='moderator'?'/dashboard/moderator/':'/dashboard/admin/';
   row.innerHTML = `<a class="btn" href="${dest}">${me.role.charAt(0).toUpperCase()+me.role.slice(1)} Dashboard</a> <button id="btnLogout" class="btn btn-primary">Log out</button>`;
   const out = $('#btnLogout'); if(out){ out.onclick=()=>{ window.ST.logout(); window.location.href="/"; }; }
     } else {
-      row.innerHTML = `<a class="btn" href="/login/">Log in</a> <a class="btn btn-primary" href="/register/">Register</a>`;
+      // Include IDs so modal handlers in `base.html` can find these buttons
+      row.innerHTML = `<a id="btnLogin" class="btn" href="/login/">Log in</a> <a id="btnRegister" class="btn btn-primary" href="/register/">Register</a>`;
     }
     const menuBtn=$('#btnMenu'); if(menuBtn){ menuBtn.onclick=()=>{ const d=$('#menu-drawer'); const open=d.classList.toggle('open'); d.setAttribute('aria-hidden', String(!open)); }; }
   }
